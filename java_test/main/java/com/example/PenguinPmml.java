@@ -1,84 +1,60 @@
-package com.example;
+package com.example; // パッケージ宣言
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.nio.file.Files; // ファイル入出力
+import java.nio.file.Path; // パス表現
+import java.nio.file.Paths; // パス生成ユーティリティ
+import java.util.LinkedHashMap; // 順序付きマップ
+import java.util.Map; // マップ
 
-import org.dmg.pmml.PMML;
-import org.jpmml.evaluator.Evaluator;
-import org.jpmml.evaluator.InputField;
-import org.jpmml.evaluator.ModelEvaluatorBuilder;
-import org.jpmml.evaluator.ProbabilityDistribution;
-import org.jpmml.evaluator.TargetField;
-import org.jpmml.model.PMMLUtil;
+import org.dmg.pmml.PMML; // PMMLモデル表現
+import org.jpmml.evaluator.Evaluator; // 評価器インターフェース
+import org.jpmml.evaluator.InputField; // 入力フィールド情報
+import org.jpmml.evaluator.ModelEvaluatorBuilder; // 評価器ビルダー
+import org.jpmml.evaluator.ProbabilityDistribution; // 確率分布
+import org.jpmml.evaluator.TargetField; // 予測ターゲット情報
+import org.jpmml.model.PMMLUtil; // PMMLユーティリティ
 
-public class PenguinPmml {
+public class PenguinPmml { // PMML推論のエントリクラス
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) throws Exception { // 実行エントリポイント
         Path modelPath = Paths.get("..", "model", "penguin.pmml").toAbsolutePath(); // PMMLモデルのパス
 
         System.out.println("=== Penguin PMML inference (Adelie=0, Gentoo=1) ==="); // 見出し
-        runModel(modelPath, Map.of(
+        runModel(modelPath, Map.<String, Object>of( // 推論を実行
                 "bill_length_mm", 40.3, // 嘴長
-                "bill_depth_mm", 18.0   // 嘴深
-        ), "bill_length_mm/bill_depth_mm"); // モデル推論
+                "island", "Torgersen"   // 島（カテゴリ）
+        ), "bill_length_mm + island"); // ラベル文字列
     }
 
-    private static void runModel(Path modelPath, Map<String, Double> rawFeatures, String label) throws Exception {
-        try (var is = Files.newInputStream(modelPath)) { // PMMLを読み込み
-            PMML pmml = PMMLUtil.unmarshal(is); // PMMLパース
-            Evaluator evaluator = new ModelEvaluatorBuilder(pmml).build(); // Evaluator生成
-            evaluator.verify(); // モデル検証
+    private static void runModel(Path modelPath, Map<String, Object> rawFeatures, String label) throws Exception { // モデルを読み込み推論を実施
+        try (var is = Files.newInputStream(modelPath)) { // PMMLファイルをストリームで開く
+            PMML pmml = PMMLUtil.unmarshal(is); // PMMLをパース
+            Evaluator evaluator = new ModelEvaluatorBuilder(pmml).build(); // 評価器を生成
+            evaluator.verify(); // モデルを検証
 
-            Map<String, ?> results = evaluator.evaluate(prepareArguments(evaluator, rawFeatures)); // 推論実行
-
-            TargetField target = evaluator.getTargetFields().get(0); // 予測ターゲット
-            Object targetVal = results.get(target.getName()); // ターゲット値
-
-            ProbabilityDistribution<?> dist = null; // 確率分布
-            Object predicted;
-
-            if (targetVal instanceof ProbabilityDistribution<?> pd) { // ターゲットが分布の場合
-                dist = pd;
-                predicted = pd.getResult();
-            } else {
-                predicted = targetVal; // ラベル値がそのまま返ってくる場合
+            Map<String, Object> arguments = new LinkedHashMap<>(); // 入力マップを生成
+            for (InputField inputField : evaluator.getInputFields()) { // すべての入力フィールドを処理
+                String name = inputField.getName(); // フィールド名
+                Object rawValue = rawFeatures.get(name); // 元データから値を取得
+                arguments.put(name, inputField.prepare(rawValue)); // 必要な前処理を適用してマップに入れる
             }
 
-            if (dist == null) { // 分布が別キーにある場合を探索
-                for (Object val : results.values()) {
-                    if (val instanceof ProbabilityDistribution<?> pd) {
-                        dist = pd;
-                        break;
-                    }
-                }
-            }
+            Map<String, ?> results = evaluator.evaluate(arguments); // 推論を実行
 
-            double probAdelie = (dist != null && dist.getProbability(0) != null)
-                    ? dist.getProbability(0)
-                    : Double.NaN; // Adelie確率
-            double probGentoo = (dist != null && dist.getProbability(1) != null)
-                    ? dist.getProbability(1)
-                    : Double.NaN; // Gentoo確率
+            TargetField target = evaluator.getTargetFields().get(0); // 予測ターゲット情報
+            ProbabilityDistribution<?> dist = (ProbabilityDistribution<?>) results.get(target.getName()); // 分布を取得
+            Object predicted = dist.getResult(); // ラベルを取得
 
-            System.out.println("[" + label + "]"); // 実行ラベル
+            double probAdelie = dist.getProbability(0); // Adelieの確率
+            double probGentoo = dist.getProbability(1); // Gentooの確率
+
+            System.out.println("[" + label + "]"); // ラベル文字列表示
             System.out.println("  Model: " + modelPath); // モデルパス表示
-            System.out.println("  Input: " + rawFeatures); // 入力表示
+            System.out.println("  Input: " + rawFeatures); // 入力値表示
             System.out.println("  Predicted label: " + predicted); // 予測ラベル表示
-            System.out.println("  Probabilities {Adelie=0, Gentoo=1}: ["
-                    + probAdelie + ", " + probGentoo + "]"); // 確率表示
+            System.out.println("  Probabilities {Adelie=0, Gentoo=1}: [" // 確率表示
+                    + probAdelie + ", " + probGentoo + "]"); // Adelie/Gentooの確率
         }
     }
 
-    private static Map<String, Object> prepareArguments(Evaluator evaluator, Map<String, Double> raw) {
-        Map<String, Object> arguments = new LinkedHashMap<>(); // 入力マップ
-        for (InputField inputField : evaluator.getInputFields()) { // 入力フィールドを走査
-            String name = inputField.getName(); // フィールド名
-            Object rawValue = raw.get(name); // 生データ取得
-            arguments.put(name, inputField.prepare(rawValue)); // 型・前処理適用
-        }
-        return arguments; // 準備済み入力を返す
-    }
 }

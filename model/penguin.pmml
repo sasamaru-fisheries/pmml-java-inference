@@ -2,11 +2,12 @@
 <PMML xmlns="http://www.dmg.org/PMML-4_4" xmlns:data="http://jpmml.org/jpmml-model/InlineTable" version="4.4">
 	<Header>
 		<Application name="SkLearn2PMML package" version="0.123.1"/>
-		<Timestamp>2025-11-24T22:36:22Z</Timestamp>
+		<Timestamp>2025-11-25T14:10:43Z</Timestamp>
 	</Header>
 	<MiningBuildTask>
-		<Extension name="repr">PMMLPipeline(steps=[('preprocess', ColumnTransformer(transformers=[('scale', StandardScaler(),
-                                 ['bill_length_mm', 'bill_depth_mm'])])),
+		<Extension name="repr">PMMLPipeline(steps=[('preprocess', ColumnTransformer(transformers=[('num', StandardScaler(), ['bill_length_mm']),
+                                ('cat', OneHotEncoder(handle_unknown='ignore'),
+                                 ['island'])])),
        ('clf', LogisticRegression(max_iter=200, random_state=42))])</Extension>
 	</MiningBuildTask>
 	<DataDictionary>
@@ -15,13 +16,17 @@
 			<Value value="1"/>
 		</DataField>
 		<DataField name="bill_length_mm" optype="continuous" dataType="double"/>
-		<DataField name="bill_depth_mm" optype="continuous" dataType="double"/>
+		<DataField name="island" optype="categorical" dataType="string">
+			<Value value="Biscoe"/>
+			<Value value="Dream"/>
+			<Value value="Torgersen"/>
+		</DataField>
 	</DataDictionary>
 	<RegressionModel functionName="classification" algorithmName="sklearn.linear_model._logistic.LogisticRegression" normalizationMethod="logit">
 		<MiningSchema>
 			<MiningField name="target" usageType="target"/>
+			<MiningField name="island" invalidValueTreatment="asIs"/>
 			<MiningField name="bill_length_mm"/>
-			<MiningField name="bill_depth_mm"/>
 		</MiningSchema>
 		<Output>
 			<OutputField name="probability(0)" optype="continuous" dataType="double" feature="probability" value="0"/>
@@ -37,19 +42,12 @@
 					<Constant dataType="double">5.204954974192847</Constant>
 				</Apply>
 			</DerivedField>
-			<DerivedField name="standardScaler(bill_depth_mm)" optype="continuous" dataType="double">
-				<Apply function="/">
-					<Apply function="-">
-						<FieldRef field="bill_depth_mm"/>
-						<Constant dataType="double">16.842641509433964</Constant>
-					</Apply>
-					<Constant dataType="double">2.005979881897835</Constant>
-				</Apply>
-			</DerivedField>
 		</LocalTransformations>
-		<RegressionTable intercept="-0.7122006927113289" targetCategory="1">
-			<NumericPredictor name="standardScaler(bill_length_mm)" coefficient="2.8492977097517698"/>
-			<NumericPredictor name="standardScaler(bill_depth_mm)" coefficient="-2.8396395474688005"/>
+		<RegressionTable intercept="-1.6705269006609675" targetCategory="1">
+			<NumericPredictor name="standardScaler(bill_length_mm)" coefficient="3.701031978580815"/>
+			<CategoricalPredictor name="island" value="Biscoe" coefficient="2.054603580883885"/>
+			<CategoricalPredictor name="island" value="Dream" coefficient="-0.8012969974955833"/>
+			<CategoricalPredictor name="island" value="Torgersen" coefficient="-1.251555753259778"/>
 		</RegressionTable>
 		<RegressionTable intercept="0.0" targetCategory="0"/>
 	</RegressionModel>
