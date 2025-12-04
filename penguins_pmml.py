@@ -36,7 +36,8 @@ preprocessor = ColumnTransformer(
             ("scaler", StandardScaler()),                  # 標準化
         ]), num_features),
         ("cat", Pipeline([
-            ("imputer", SimpleImputer(strategy="constant", missing_values=None, fill_value="X")),  # 欠損値を最頻値で補完（空文字扱い）
+            # ("imputer", SimpleImputer(strategy="constant", missing_values=None, fill_value="X")),  # 欠損値を最頻値で補完（空文字扱い）
+            ("imputer", SimpleImputer(strategy="constant")),  # 欠損値を最頻値で補完（空文字扱い）
             ("onehot", OneHotEncoder(handle_unknown="ignore")),    # ワンホット
         ]), cat_features),
     ],

@@ -2,7 +2,7 @@
 <PMML xmlns="http://www.dmg.org/PMML-4_4" xmlns:data="http://jpmml.org/jpmml-model/InlineTable" version="4.4">
 	<Header>
 		<Application name="SkLearn2PMML package" version="0.123.1"/>
-		<Timestamp>2025-12-04T14:34:44Z</Timestamp>
+		<Timestamp>2025-12-04T14:49:45Z</Timestamp>
 	</Header>
 	<MiningBuildTask>
 		<Extension name="repr">PMMLPipeline(steps=[('preprocess', ColumnTransformer(transformers=[('num',
@@ -12,9 +12,7 @@
                                  ['bill_length_mm']),
                                 ('cat',
                                  Pipeline(steps=[('imputer',
-                                                  SimpleImputer(fill_value='X',
-                                                                missing_values=None,
-                                                                strategy='constant')),
+                                                  SimpleImputer(strategy='constant')),
                                                  ('onehot',
                                                   OneHotEncoder(handle_unknown='ignore'))]),
                                  ['island'])])),
@@ -35,7 +33,7 @@
 	<RegressionModel functionName="classification" algorithmName="sklearn.linear_model._logistic.LogisticRegression" normalizationMethod="logit">
 		<MiningSchema>
 			<MiningField name="target" usageType="target"/>
-			<MiningField name="island" missingValueReplacement="X" missingValueTreatment="asValue" invalidValueTreatment="asIs"/>
+			<MiningField name="island" missingValueReplacement="missing_value" missingValueTreatment="asValue" invalidValueTreatment="asIs"/>
 			<MiningField name="bill_length_mm" missingValueReplacement="42.0" missingValueTreatment="asMedian"/>
 		</MiningSchema>
 		<Output>

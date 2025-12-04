@@ -30,7 +30,8 @@ public class PenguinPmml { // PMML推論の最小サンプル
         // 入力データをそのままマップで用意
         Map<String, Object> rawFeatures = new LinkedHashMap<>(); // null許容の入力データ
         rawFeatures.put("bill_length_mm", null); // 数値欠損はnullを渡し、インプタで補完
-        rawFeatures.put("island", "");          // カテゴリ欠損は空文字
+        // rawFeatures.put("island", "");          // カテゴリ欠損は空文字
+        rawFeatures.put("island", null);          
 
         // 評価器が期待する形式に変換（型・前処理を適用）
         Map<String, Object> arguments = new java.util.LinkedHashMap<>();
