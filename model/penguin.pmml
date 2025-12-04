@@ -2,7 +2,7 @@
 <PMML xmlns="http://www.dmg.org/PMML-4_4" xmlns:data="http://jpmml.org/jpmml-model/InlineTable" version="4.4">
 	<Header>
 		<Application name="SkLearn2PMML package" version="0.123.1"/>
-		<Timestamp>2025-11-30T13:07:24Z</Timestamp>
+		<Timestamp>2025-12-04T14:34:44Z</Timestamp>
 	</Header>
 	<MiningBuildTask>
 		<Extension name="repr">PMMLPipeline(steps=[('preprocess', ColumnTransformer(transformers=[('num',
@@ -12,8 +12,9 @@
                                  ['bill_length_mm']),
                                 ('cat',
                                  Pipeline(steps=[('imputer',
-                                                  SimpleImputer(missing_values='',
-                                                                strategy='most_frequent')),
+                                                  SimpleImputer(fill_value='X',
+                                                                missing_values=None,
+                                                                strategy='constant')),
                                                  ('onehot',
                                                   OneHotEncoder(handle_unknown='ignore'))]),
                                  ['island'])])),
@@ -26,7 +27,6 @@
 		</DataField>
 		<DataField name="bill_length_mm" optype="continuous" dataType="double"/>
 		<DataField name="island" optype="categorical" dataType="string">
-			<Value value="" property="missing"/>
 			<Value value="Biscoe"/>
 			<Value value="Dream"/>
 			<Value value="Torgersen"/>
@@ -35,7 +35,7 @@
 	<RegressionModel functionName="classification" algorithmName="sklearn.linear_model._logistic.LogisticRegression" normalizationMethod="logit">
 		<MiningSchema>
 			<MiningField name="target" usageType="target"/>
-			<MiningField name="island" missingValueReplacement="Biscoe" missingValueTreatment="asMode" invalidValueTreatment="asIs"/>
+			<MiningField name="island" missingValueReplacement="X" missingValueTreatment="asValue" invalidValueTreatment="asIs"/>
 			<MiningField name="bill_length_mm" missingValueReplacement="42.0" missingValueTreatment="asMedian"/>
 		</MiningSchema>
 		<Output>

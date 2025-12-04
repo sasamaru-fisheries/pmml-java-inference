@@ -39,7 +39,7 @@ public class PenguinOnnx { // ONNX推論の最小サンプル
 
                 // 結果を表示
                 System.out.println("Model : " + modelPath);
-                System.out.println("Input : bill_length_mm=40.3, island=Torgersen");
+                System.out.println("Input : bill_length_mm=NaN, island=\"\"");
                 System.out.println("Label : " + label);
                 System.out.println("Prob  : " + Arrays.toString(prob)); // [Adelie, Gentoo]
             }

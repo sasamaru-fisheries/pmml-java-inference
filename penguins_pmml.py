@@ -1,5 +1,6 @@
 import os
 
+import numpy as np
 import seaborn as sns  # seabornからペンギンデータセットを取得
 from sklearn.compose import ColumnTransformer  # 列ごとの前処理指定に使用
 from sklearn.impute import SimpleImputer  # 欠損値補完
@@ -31,11 +32,11 @@ cat_features = ["island"]          # カテゴリ
 preprocessor = ColumnTransformer(
     [
         ("num", Pipeline([
-            ("imputer", SimpleImputer(strategy="median")),  # 欠損値を中央値で補完
+            ("imputer", SimpleImputer(strategy="median", missing_values=np.nan)),  # 欠損値を中央値で補完
             ("scaler", StandardScaler()),                  # 標準化
         ]), num_features),
         ("cat", Pipeline([
-            ("imputer", SimpleImputer(strategy="most_frequent", missing_values="")),  # 欠損値を最頻値で補完（空文字扱い）
+            ("imputer", SimpleImputer(strategy="constant", missing_values=None, fill_value="X")),  # 欠損値を最頻値で補完（空文字扱い）
             ("onehot", OneHotEncoder(handle_unknown="ignore")),    # ワンホット
         ]), cat_features),
     ],
