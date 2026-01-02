@@ -4,7 +4,7 @@
 - `python penguins_pmml.py` で `model/penguin.pmml` を生成
 
 ## Java 推論 (ONNX / PMML)
-- `cd java_test`
+- `cd inference`
 - 初回はクラスをビルドするため `mvn compile` を実行
 - ONNX 推論: `mvn -Dexec.mainClass=com.example.PenguinOnnx exec:java`
 - PMML 推論: `mvn -Dexec.mainClass=com.example.PenguinPmml exec:java`
